@@ -1,0 +1,95 @@
+@PACKAGE_INIT@
+
+# INIT
+
+include("${CMAKE_CURRENT_LIST_DIR}/CORAL.cmake")
+
+
+
+# CONFIG
+
+#- ADD SUPPORT FOR C ATOMICS WHEN USING MSVC
+
+if (MSVC)
+    target_compile_options(CORAL::CORAL
+                           INTERFACE
+                           "/experimental:c11atomics"
+    )
+endif()
+
+
+
+#- REMOVE PROJECT-LOCAL INCLUDE DIRECTORY
+
+get_target_property(CORAL_INTERFACE_INCLUDE_DIRECTORIES
+                    CORAL::CORAL
+                    INTERFACE_INCLUDE_DIRECTORIES
+)
+
+set_and_check(CORAL_PROJECT_LOCAL_INCLUDE_DIR "@PACKAGE_CORAL_INSTALL_INCLUDE_DIR@")
+
+list(REMOVE_ITEM
+     CORAL_INTERFACE_INCLUDE_DIRECTORIES
+     "$<BUILD_INTERFACE:${CORAL_PROJECT_LOCAL_INCLUDE_DIR}>"
+)
+
+set_target_properties(CORAL::CORAL
+                      PROPERTIES
+                      INTERFACE_INCLUDE_DIRECTORIES "${CORAL_INTERFACE_INCLUDE_DIRECTORIES}"
+)
+
+
+
+#- ADD RUNTIME DIRECTORY TO PATH ENVIRONMENT VARIABLE
+
+if (CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+    set_and_check(CORAL_INSTALL_RUNTIME_DIR "@PACKAGE_CORAL_INSTALL_RUNTIME_DIR@")
+
+    cmake_path(NATIVE_PATH CORAL_INSTALL_RUNTIME_DIR
+               NORMALIZE
+               CORAL_INSTALL_RUNTIME_DIR
+    )
+
+
+    cmake_host_system_information(RESULT CORAL_CURRENT_USER_PATH
+                                  QUERY WINDOWS_REGISTRY "HKEY_CURRENT_USER\\Environment"
+                                  VALUE "Path"
+                                  ERROR_VARIABLE CORAL_CURRENT_USER_PATH_ERROR_VAR
+    )
+
+    if (NOT ${CORAL_CURRENT_USER_PATH_ERROR_VAR} EQUAL "")
+        message(FATAL_ERROR "PATH environment variable was not found: ${CORAL_CURRENT_USER_PATH_ERROR_VAR}")
+    endif()
+
+
+    string(FIND
+           "${CORAL_CURRENT_USER_PATH}"
+           "${CORAL_INSTALL_RUNTIME_DIR}"
+           CORAL_INSTALL_RUNTIME_DIR_POS_IN_PATH
+    )
+
+    if (CORAL_INSTALL_RUNTIME_DIR_POS_IN_PATH EQUAL "-1")
+        find_program(CORAL_WINDOWS_REGISTRY_EDITOR
+                     "reg.exe"
+                     REQUIRED
+        )
+
+        cmake_path(NATIVE_PATH CORAL_WINDOWS_REGISTRY_EDITOR
+                   NORMALIZE
+                   CORAL_WINDOWS_REGISTRY_EDITOR
+        )
+
+        execute_process(COMMAND
+                        ${CORAL_WINDOWS_REGISTRY_EDITOR} ADD HKEY_CURRENT_USER\\Environment /V Path /D "${CORAL_CURRENT_USER_PATH}${CORAL_INSTALL_RUNTIME_DIR};" /F
+                        OUTPUT_QUIET
+        )
+
+        message(STATUS "Added ${CORAL_INSTALL_RUNTIME_DIR} to PATH environment variable.")
+    endif()
+endif()
+
+
+
+# COMPLETION CHECK
+
+check_required_components(CORAL)

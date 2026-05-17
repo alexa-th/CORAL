@@ -1,2 +1,14 @@
-# For personal organisation
+# General
+dependencies/
+build/
+out/
+Testing/
+.vs/
+.cache/
+CMakeSettings.json
+
+# Documentation
+docs/html/
+
+# Personal organisation
 org/
