@@ -11,7 +11,7 @@
 #include "common/atomic.h"
 #include "common/noreturn.h"
 #include "common/utils.h"
-#include "concurrency/synchronization.h"
+#include "concurrency/signal.h"
 #include "concurrency/threadDefinition.h"
 #include "concurrency/thread.h"
 

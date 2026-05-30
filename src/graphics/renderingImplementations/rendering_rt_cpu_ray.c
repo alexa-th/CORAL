@@ -107,7 +107,7 @@ bool Ray_refract(const Ray_t* restrict ray,
     CORAL_MATH_VEC_GENERIC(4,
                            mul_scalar,
                            refractionNormal,
-                           -sqrt(fabs(1.0 - perpendicularDirectionSquaredMagnitude)),
+                           -sqrt(fabs((Float_t)(1.0 - perpendicularDirectionSquaredMagnitude))),
                            &parallelDirection
     );
 

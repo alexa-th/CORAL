@@ -15,26 +15,44 @@
 
 // WINDOWING
 
+//- DEFINITIONS
+
+typedef struct {
+    size_t width;
+    size_t height;
+} WindowInfo_t;
+
+
+
 //- WINDOW
 
 //- - FUNCTIONS
 
 void Window_init(Window_t* window, size_t width, size_t height, Window_t* parentWindow) {
+    WindowInfo_t* windowInfo = CORAL_malloc(sizeof(WindowInfo_t));
+    CORAL_ASSERT(windowInfo, "Failed to allocate memory for window information.");
+
+    windowInfo->width = width;
+    windowInfo->height = height;
+
+    *window = ((Window_t){(uintptr_t)windowInfo, 0U, .shouldClose = false});
     memset(&window->callbacks, 0, sizeof(Window_CallbackFuncs_t));
-    *window = ((Window_t){(uintptr_t)parentWindow, (uintptr_t)NULL, .shouldClose = false});
 }
 
 
-void Window_destr(Window_t* window) { }
+void Window_destr(Window_t* window) {
+    CORAL_free((void*)window->windowResource);
+}
 
 
 void Window_getDrawableDimensions(Window_t* window, size_t* width, size_t* height) {
-    *width = 1U;
-    *height = 1U;
+    WindowInfo_t* windowInfo = (void*)window->windowResource;
+    *width = windowInfo->width;
+    *height = windowInfo->height;
 }
 
 
-void Window_getMouseRestriction(Window_t* window) {
+bool Window_getMouseRestriction(Window_t* window) {
     return false;
 }
 
@@ -44,7 +62,22 @@ void Window_processEvents(void) { }
 
 
 bool Window_allShouldClose(void) {
-    return true;
+    return false;
+}
+
+
+bool Window_getMouseKeyPressed(MouseInput_e key) {
+    return false;
+}
+
+
+bool Window_getKeyboardKeyPressed(KeyboardInput_e key) {
+    return false;
+}
+
+
+uint16_t Window_getModifierFlags(void) {
+    return 0U;
 }
 
 
@@ -54,26 +87,33 @@ bool Window_allShouldClose(void) {
 //- - FUNCTIONS
 
 void Framebuffer_init(Framebuffer_t* framebuffer, Window_t* window) {
-    framebuffer->windowResource = (uintptr_t)window;
-    framebuffer->drawingResource = (uintptr_t)NULL;
-    framebuffer->width = 1U;
-    framebuffer->height = 1U;
-
-    framebuffer->pixelBuffer = CORAL_malloc(sizeof(Vec4b_u));
-    CORAL_ASSERT(framebuffer->pixelBuffer, "Failed to allocate framebuffer.");
-
-    framebuffer->pixelBuffer[0U] = ((Vec4b_u){0U, 0U, 0U, 0U});
+    WindowInfo_t* windowInfo = (void*)window->windowResource;
+    Framebuffer__init(framebuffer, windowInfo->width, windowInfo->height);
 }
 
 
-void Framebuffer_destr(Framebuffer_t* framebuffer, Window_t* window) {
+void Framebuffer__init(Framebuffer_t* framebuffer, size_t width, size_t height) {
+    *framebuffer = ((Framebuffer_t){0U, 0U, 0U, 0U, NULL});
+    Framebuffer__resize(framebuffer, width, height);
+}
+
+
+void Framebuffer_destr(Framebuffer_t* framebuffer) {
     CORAL_free(framebuffer->pixelBuffer);
-    memset(framebuffer, 0, sizeof(Framebuffer_t));
 }
+
+
+bool Framebuffer_isWindowDrawable(Framebuffer_t* framebuffer, Window_t* window) {
+    return true;
+}
+
+
+void Framebuffer_makeWindowDrawable(Framebuffer_t* framebuffer, Window_t* window) { }
 
 
 void Framebuffer_resize(Framebuffer_t* framebuffer, Window_t* window) {
-    Framebuffer__resize(framebuffer, 1U, 1U);
+    WindowInfo_t* windowInfo = (void*)window->windowResource;
+    Framebuffer__resize(framebuffer, windowInfo->width, windowInfo->height);
 }
 
 
@@ -101,7 +141,9 @@ end:
 }
 
 
-void Framebuffer_drawToWindow(Framebuffer_t* framebuffer, Window_t* window, bool waitForVerticalSync) { }
+bool Framebuffer_drawToWindow(Framebuffer_t* framebuffer, Window_t* window, bool waitForVerticalSync) {
+    return true;
+}
 
 
 
