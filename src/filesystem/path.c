@@ -28,7 +28,7 @@ static Error_t Path_parse(Path_t* path) {
     for (; currentCharacter >= endCharacter; currentCharacter--) {
         switch (*currentCharacter) {
             case '.':
-                if (!extensionLength) { extensionLength = startCharacter - currentCharacter + 1U; }
+                if (!extensionLength) { extensionLength = startCharacter - currentCharacter; }
                 break;
 
             case CORAL_FILESYSTEM_PATH_SEPERATOR_WINDOWS:
