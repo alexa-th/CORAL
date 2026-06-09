@@ -77,6 +77,10 @@ Error_t File_init(File_t* file, uint8_t fileMode) {
     file->filePtr = filePtr;
     file->filePath.pathStr.additionalData[1U] = fileMode;
 
+    if (CORAL_FILESYSTEM_FILE_HAS_MODE(fileMode, CORAL_FILESYSTEM_FILE_MODE_UNBUFFERED)) {
+        CORAL_ASSERT(!setvbuf(file->filePtr, NULL, _IONBF, 0U), "Failed to disable buffering.");
+    }
+
     return CORAL_ERROR_NONE;
 }
 
@@ -110,6 +114,10 @@ Error_t File_changeMode(File_t* file, uint8_t newFileMode) {
 
     if (!file->filePtr) { return CORAL_ERROR_UNKOWN; }
     else { file->filePath.pathStr.additionalData[1U] = newFileMode; }
+
+    if (CORAL_FILESYSTEM_FILE_HAS_MODE(newFileMode, CORAL_FILESYSTEM_FILE_MODE_UNBUFFERED)) {
+        CORAL_ASSERT(!setvbuf(file->filePtr, NULL, _IONBF, 0U), "Failed to disable buffering.");
+    }
 
     return CORAL_ERROR_NONE;
 }

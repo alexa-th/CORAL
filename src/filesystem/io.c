@@ -78,10 +78,13 @@ Error_t IO_readComplete(File_t* file) {
 
 
 Error_t IO_write(File_t* file, const void* source, size_t size, size_t* written) {
-    size_t writtenBytes = 0U;
     Error_t fileError = CORAL_ERROR_NONE;
+    size_t writtenBytes = 0U;
+    uint8_t fileMode = file->filePath.pathStr.additionalData[1U];
 
-    if (!CORAL_FILESYSTEM_FILE_HAS_MODE(file->filePath.pathStr.additionalData[1U], CORAL_FILESYSTEM_FILE_MODE_WRITE_BASE | CORAL_FILESYSTEM_FILE_MODE_BINARY)) {
+    if (!(fileMode & (CORAL_FILESYSTEM_FILE_MODE_WRITE | CORAL_FILESYSTEM_FILE_MODE_APPEND)) ||
+        !CORAL_FILESYSTEM_FILE_HAS_MODE(fileMode, CORAL_FILESYSTEM_FILE_MODE_BINARY)
+    ) {
         fileError = CORAL_ERROR_INVALID_ARGS;
         goto end;
     }

@@ -29,46 +29,48 @@
 
 /*! \anchor CORAL_FILESYSTEM_FILE_MODE_
  *  \name File modes
- *  \note The mode of a \p File_t will be stored in \mlink{String_t,filePath.pathStr.,additionalData} at index \c 1U.
+ *  \note The mode of a \p File_t is stored in \mlink{String_t,filePath.pathStr.,additionalData} at index \c 1U.
  *  @{
  */
 
 /*! \brief Reads from the beginning of a file. */
-#define CORAL_FILESYSTEM_FILE_MODE_READ                 ((uint8_t)0x01)
-
-
-/*! \note Not to be used on its own, use \verblink{CORAL_FILESYSTEM_FILE_MODE_WRITE} to write to files. */
-#define CORAL_FILESYSTEM_FILE_MODE_WRITE_BASE           ((uint8_t)0x02)
+#define CORAL_FILESYSTEM_FILE_MODE_READ                     ((uint8_t)0x01)
 
 
 /*! \brief Starts writing at the beginning of a file. */
-#define CORAL_FILESYSTEM_FILE_MODE_WRITE                (CORAL_FILESYSTEM_FILE_MODE_WRITE_BASE | (uint8_t)0x04)
+#define CORAL_FILESYSTEM_FILE_MODE_WRITE                    ((uint8_t)0x02)
 
 
 /*! \brief Starts writing at the end of a file. */
-#define CORAL_FILESYSTEM_FILE_MODE_APPEND               (CORAL_FILESYSTEM_FILE_MODE_WRITE_BASE | (uint8_t)0x08)
+#define CORAL_FILESYSTEM_FILE_MODE_APPEND                   ((uint8_t)0x04)
 
 
 /*! \brief Must be specified if a file that does not yet exist is to be opened in read-write mode. */
-#define CORAL_FILESYSTEM_FILE_MODE_READ_WRITE_CREATE    (CORAL_FILESYSTEM_FILE_MODE_READ | CORAL_FILESYSTEM_FILE_MODE_WRITE | (uint8_t)0x10)
+#define CORAL_FILESYSTEM_FILE_MODE_READ_WRITE_CREATE        (CORAL_FILESYSTEM_FILE_MODE_READ | CORAL_FILESYSTEM_FILE_MODE_WRITE | (uint8_t)0x08)
 
 
 /*! \brief The opened file is treated as binary data and not text. */
-#define CORAL_FILESYSTEM_FILE_MODE_BINARY               ((uint8_t)0x20)
+#define CORAL_FILESYSTEM_FILE_MODE_BINARY                   ((uint8_t)0x10)
+
+
+/*! \brief Any operation will be performed on the file directly, without first buffering. */
+#define CORAL_FILESYSTEM_FILE_MODE_UNBUFFERED               ((uint8_t)0x20)
 
 
 /*! \brief If specified, any \p File_init() function will fail if the file to be opened already exists.
- *  \note Only affects file opening behaviour when specified in combination with \verblink{CORAL_FILESYSTEM_FILE_MODE_WRITE} or \verblink{CORAL_FILESYSTEM_FILE_MODE_READ_WRITE_CREATE}.
+ *  \note
+ *      Only affects file opening behaviour when specified in combination with \verblink{CORAL_FILESYSTEM_FILE_MODE_WRITE}
+ *      or \verblink{CORAL_FILESYSTEM_FILE_MODE_READ_WRITE_CREATE}.
  */
-#define CORAL_FILESYSTEM_FILE_MODE_NO_OVERWRITE         ((uint8_t)0x40)
+#define CORAL_FILESYSTEM_FILE_MODE_NO_OVERWRITE             ((uint8_t)0x40)
 
 
 /*! \brief Will cause any write operation on a \p File_t to not be performed on its \mlink{File_t,readBuffer} aswell. */
-#define CORAL_FILESYSTEM_FILE_MODE_NO_REPLICATE_ON_WRITE ((uint8_t)0x80)
+#define CORAL_FILESYSTEM_FILE_MODE_NO_REPLICATE_ON_WRITE    ((uint8_t)0x80)
 
 
 /*! \brief Checks whether \p FILE_MODE includes the given \p MODE. */
-#define CORAL_FILESYSTEM_FILE_HAS_MODE(FILE_MODE, MODE) (((FILE_MODE) & (MODE)) == (MODE))
+#define CORAL_FILESYSTEM_FILE_HAS_MODE(FILE_MODE, MODE)     (((FILE_MODE) & (MODE)) == (MODE))
 
 /*! @} */
 
