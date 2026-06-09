@@ -240,7 +240,7 @@ static LRESULT CALLBACK Window_windowProcedure(HWND windowHandle, UINT message, 
 }
 
 
-void Window_init(Window_t* window, std::size_t width, std::size_t height, Window_t* parentWindow) {
+void Window_init(Window_t* window, std::size_t width, std::size_t height, const Window_t* parentWindow) {
     std::memset(&window->callbacks, 0, sizeof(Window_CallbackFuncs_t));
 
     window->windowResource = (std::uintptr_t)nullptr;
@@ -275,7 +275,7 @@ void Window_destr(Window_t* window) {
 }
 
 
-void Window_getDrawableDimensions(Window_t* window, std::size_t* width, std::size_t* height) {
+void Window_getDrawableDimensions(const Window_t* window, std::size_t* width, std::size_t* height) {
     RECT clientRectangle;
 
     CORAL_ASSERT(GetClientRect((HWND)window->windowResource, &clientRectangle), "Failed to get the drawable dimensions of a window.");
@@ -285,7 +285,7 @@ void Window_getDrawableDimensions(Window_t* window, std::size_t* width, std::siz
 }
 
 
-bool Window_getMouseRestriction(Window_t* window) {
+bool Window_getMouseRestriction(const Window_t* window) {
     return GetCapture() == (HWND)window->windowResource;
 }
 
@@ -417,12 +417,6 @@ std::uint16_t Window_getModifierFlags(void) {
 
 //- FRAMEBUFFER
 
-//- - DEFINITIONS
-
-#define CORAL_GRAPHICS_FRAMEBUFFER_BLOCK_SIZE ((std::size_t)(2U * 1024U))
-
-
-
 //- - GLOBALS
 
 const D2D1_RENDER_TARGET_PROPERTIES g_generalRenderTargetProperties = {.type = D2D1_RENDER_TARGET_TYPE_SOFTWARE,
@@ -439,7 +433,7 @@ const D2D1_RENDER_TARGET_PROPERTIES g_generalRenderTargetProperties = {.type = D
 
 //- - FUNCTIONS
 
-static inline void Framebuffer_init_renderTarget(Framebuffer_t* framebuffer, Window_t* window) {
+static inline void Framebuffer_init_renderTarget(Framebuffer_t* framebuffer, const Window_t* window) {
     D2D1_HWND_RENDER_TARGET_PROPERTIES windowRenderTargetProperties = {.hwnd = (HWND)window->windowResource,
                                                                        .pixelSize = {.width = (UINT32)framebuffer->width,
                                                                                      .height = (UINT32)framebuffer->height,
@@ -486,7 +480,7 @@ static inline void Framebuffer_init_bitmap(Framebuffer_t* framebuffer) {
 }
 
 
-void Framebuffer_init(Framebuffer_t* framebuffer, Window_t* window) {
+void Framebuffer_init(Framebuffer_t* framebuffer, const Window_t* window) {
     HRESULT result;
 
     if (!g_d2dFactory) {
@@ -504,12 +498,6 @@ void Framebuffer_init(Framebuffer_t* framebuffer, Window_t* window) {
     Framebuffer__init(framebuffer, width, height);
     Framebuffer_init_renderTarget(framebuffer, window);
     Framebuffer_init_bitmap(framebuffer);
-}
-
-
-void Framebuffer__init(Framebuffer_t* framebuffer, size_t width, size_t height) {
-    *framebuffer = ((Framebuffer_t){0U, 0U, 0U, 0U, nullptr});
-    Framebuffer__resize(framebuffer, width, height);
 }
 
 
@@ -540,7 +528,7 @@ void Framebuffer_destr(Framebuffer_t* framebuffer) {
 }
 
 
-bool Framebuffer_isWindowDrawable(Framebuffer_t* framebuffer, Window_t* window) {
+bool Framebuffer_isWindowDrawable(const Framebuffer_t* framebuffer, const Window_t* window) {
     if (framebuffer->windowResource &&
         ((ID2D1HwndRenderTarget*)framebuffer->windowResource)->GetHwnd() == (HWND)window->windowResource
     ) {
@@ -555,7 +543,7 @@ bool Framebuffer_isWindowDrawable(Framebuffer_t* framebuffer, Window_t* window) 
 }
 
 
-void Framebuffer_makeWindowDrawable(Framebuffer_t* framebuffer, Window_t* window) {
+void Framebuffer_makeWindowDrawable(Framebuffer_t* framebuffer, const Window_t* window) {
     if (Framebuffer_isWindowDrawable(framebuffer, window)) { return; }
 
     Framebuffer_destr_bitmap(framebuffer);
@@ -565,7 +553,7 @@ void Framebuffer_makeWindowDrawable(Framebuffer_t* framebuffer, Window_t* window
 }
 
 
-void Framebuffer_resize(Framebuffer_t* framebuffer, Window_t* window) {
+void Framebuffer_resize(Framebuffer_t* framebuffer, const Window_t* window) {
     std::size_t newWidth;
     std::size_t newHeight;
     Window_getDrawableDimensions(window, &newWidth, &newHeight);
@@ -573,33 +561,7 @@ void Framebuffer_resize(Framebuffer_t* framebuffer, Window_t* window) {
 }
 
 
-void Framebuffer__resize(Framebuffer_t* framebuffer, std::size_t newWidth, std::size_t newHeight) {
-    if ((!newWidth || !newHeight) && framebuffer->pixelBuffer) {
-        CORAL_free(framebuffer->pixelBuffer);
-        framebuffer->pixelBuffer = nullptr;
-    }
-    else {
-        std::size_t oldAllocationSize = CORAL_TO_ALIGNMENT(sizeof(Vec4b_u) * framebuffer->width * framebuffer->height,
-                                                           CORAL_GRAPHICS_FRAMEBUFFER_BLOCK_SIZE
-        );
-
-        std::size_t newAllocationSize = CORAL_TO_ALIGNMENT(sizeof(Vec4b_u) * newWidth * newHeight,
-                                                           CORAL_GRAPHICS_FRAMEBUFFER_BLOCK_SIZE
-        );
-
-        if (oldAllocationSize != newAllocationSize) {
-            framebuffer->pixelBuffer = (Vec4b_u*)CORAL_realloc(framebuffer->pixelBuffer, newAllocationSize);
-
-            CORAL_ASSERT(framebuffer->pixelBuffer, "Failed to allocate memory for a framebuffer.");
-        }
-    }
-
-    framebuffer->width = newWidth;
-    framebuffer->height = newHeight;
-}
-
-
-bool Framebuffer_drawToWindow(Framebuffer_t* framebuffer, Window_t* window, bool waitForVerticalSync) {
+bool Framebuffer_drawToWindow(Framebuffer_t* framebuffer, const Window_t* window, bool waitForVerticalSync) {
     if (!Framebuffer_isWindowDrawable(framebuffer, window)) { return false; }
 
     HRESULT result;

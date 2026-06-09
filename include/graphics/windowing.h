@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "../common/api.h"
+#include "../common/error.h"
+#include "../filesystem/path.h"
 #include "../math/vecTypes.h"
 #include "./input.h"
 
@@ -122,7 +124,7 @@ struct Window {
  *  \param[in]  window          Must remain in scope until \p Window_destr() is called.
  *  \param[in]  parentWindow    (Opt.) If provided, \p window will be a child of \p parentWindow.
  */
-CORAL_API void Window_init(Window_t* window, size_t width, size_t height, Window_t* parentWindow);
+CORAL_API void Window_init(Window_t* window, size_t width, size_t height, const Window_t* parentWindow);
 
 
 /*! \brief Closes and destructs \p window. */
@@ -133,11 +135,11 @@ CORAL_API void Window_destr(Window_t* window);
  *  \param[out] width   The width of the drawable area.
  *  \param[out] height  The height of the drawable area.
  */
-CORAL_API void Window_getDrawableDimensions(Window_t* window, size_t* width, size_t* height);
+CORAL_API void Window_getDrawableDimensions(const Window_t* window, size_t* width, size_t* height);
 
 
 /*! \returns \c true if the mouse is restricted to \p window, otherwise \c false. */
-CORAL_API bool Window_getMouseRestriction(Window_t* window);
+CORAL_API bool Window_getMouseRestriction(const Window_t* window);
 
 
 /*! \brief Will restrict the mouse to \p window or release it from restriction.
@@ -235,7 +237,7 @@ typedef struct {
 /*! \brief Initializes \p framebuffer such that it can be used to draw to \p window.
  *  \note \p framebuffer will be initialized with the dimensions provided by \p Window_getDrawableDimensions().
  */
-CORAL_API void Framebuffer_init(Framebuffer_t* framebuffer, Window_t* window);
+CORAL_API void Framebuffer_init(Framebuffer_t* framebuffer, const Window_t* window);
 
 
 /*! \brief Initializes \p framebuffer with the dimensions \p width and \p height.
@@ -249,20 +251,20 @@ CORAL_API void Framebuffer_destr(Framebuffer_t* framebuffer);
 
 
 /*! \returns \c true if \p framebuffer can be used to draw to \p window, otherwise \c false. */
-CORAL_API bool Framebuffer_isWindowDrawable(Framebuffer_t* framebuffer, Window_t* window);
+CORAL_API bool Framebuffer_isWindowDrawable(const Framebuffer_t* framebuffer, const Window_t* window);
 
 
 /*! \brief Will make \p framebuffer be able to be used to draw to \p window.
  *  \note \p framebuffer may be able to be used to draw to \e only \p window.
  */
-CORAL_API void Framebuffer_makeWindowDrawable(Framebuffer_t* framebuffer, Window_t* window);
+CORAL_API void Framebuffer_makeWindowDrawable(Framebuffer_t* framebuffer, const Window_t* window);
 
 
 /*! \brief Resizes \p framebuffer to the dimensions of \p window.
  *  \param[in]  window  May be any \p Window_t, \p framebuffer must not be able to be used to draw to \p window.
  *  \note Any image data stored in \p framebuffer may need to be redrawn.
  */
-CORAL_API void Framebuffer_resize(Framebuffer_t* framebuffer, Window_t* window);
+CORAL_API void Framebuffer_resize(Framebuffer_t* framebuffer, const Window_t* window);
 
 
 /*! \brief Resizes \p framebuffer to the dimensions described by \p newWidth and \p newHeight.
@@ -275,7 +277,17 @@ CORAL_API void Framebuffer__resize(Framebuffer_t* framebuffer, size_t newWidth, 
  *  \param[in]  waitForVerticalSync     Will wait until the screen refreshes to present the window.
  *  \returns \c true if drawing succeeded, otherwise \c false.
  */
-CORAL_API bool Framebuffer_drawToWindow(Framebuffer_t* framebuffer, Window_t* window, bool waitForVerticalSync);
+CORAL_API bool Framebuffer_drawToWindow(Framebuffer_t* framebuffer, const Window_t* window, bool waitForVerticalSync);
+
+
+/*! \brief Writes the contents of \p framebuffer to a file at \p filePath.
+ *  \param[in]  filePath        May not be the path of a directory or have a file extension other than \".ppm\" or none.
+ *  \param[in]  allowOverwrite  If \c true, \p filePath may be the path of an already existing file; otherwise, it may not.
+ *  \returns
+ *      \p CORAL_ERROR_NONE on success, \p CORAL_ERROR_INVALID_ARGS if \p filePath did not meet the specified criteria,
+ *      \p CORAL_ERROR_UNKOWN if an IO-error occured.
+ */
+CORAL_API Error_t Framebuffer_writeToFile(const Framebuffer_t* framebuffer, const Path_t* filePath, bool allowOverwrite);
 
 /*! @} */
 

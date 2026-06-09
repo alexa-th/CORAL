@@ -30,7 +30,7 @@ typedef struct {
 
 //- - - WINDOW-SPECIFIC
 
-void Window_init(Window_t* window, size_t width, size_t height, Window_t* parentWindow) {
+void Window_init(Window_t* window, size_t width, size_t height, const Window_t* parentWindow) {
     WindowInfo_t* windowInfo = CORAL_malloc(sizeof(WindowInfo_t));
     CORAL_ASSERT(windowInfo, "Failed to allocate memory for window information.");
 
@@ -47,14 +47,14 @@ void Window_destr(Window_t* window) {
 }
 
 
-void Window_getDrawableDimensions(Window_t* window, size_t* width, size_t* height) {
+void Window_getDrawableDimensions(const Window_t* window, size_t* width, size_t* height) {
     WindowInfo_t* windowInfo = (void*)window->windowResource;
     *width = windowInfo->width;
     *height = windowInfo->height;
 }
 
 
-bool Window_getMouseRestriction(Window_t* window) {
+bool Window_getMouseRestriction(const Window_t* window) {
     return false;
 }
 
@@ -98,15 +98,9 @@ uint16_t Window_getModifierFlags(void) {
 
 //- - FUNCTIONS
 
-void Framebuffer_init(Framebuffer_t* framebuffer, Window_t* window) {
+void Framebuffer_init(Framebuffer_t* framebuffer, const Window_t* window) {
     WindowInfo_t* windowInfo = (void*)window->windowResource;
     Framebuffer__init(framebuffer, windowInfo->width, windowInfo->height);
-}
-
-
-void Framebuffer__init(Framebuffer_t* framebuffer, size_t width, size_t height) {
-    *framebuffer = ((Framebuffer_t){0U, 0U, 0U, 0U, NULL});
-    Framebuffer__resize(framebuffer, width, height);
 }
 
 
@@ -115,45 +109,21 @@ void Framebuffer_destr(Framebuffer_t* framebuffer) {
 }
 
 
-bool Framebuffer_isWindowDrawable(Framebuffer_t* framebuffer, Window_t* window) {
+bool Framebuffer_isWindowDrawable(const Framebuffer_t* framebuffer, const Window_t* window) {
     return true;
 }
 
 
-void Framebuffer_makeWindowDrawable(Framebuffer_t* framebuffer, Window_t* window) { }
+void Framebuffer_makeWindowDrawable(Framebuffer_t* framebuffer, const Window_t* window) { }
 
 
-void Framebuffer_resize(Framebuffer_t* framebuffer, Window_t* window) {
+void Framebuffer_resize(Framebuffer_t* framebuffer, const Window_t* window) {
     WindowInfo_t* windowInfo = (void*)window->windowResource;
     Framebuffer__resize(framebuffer, windowInfo->width, windowInfo->height);
 }
 
 
-void Framebuffer__resize(Framebuffer_t* framebuffer, size_t newWidth, size_t newHeight) {
-    if ((!newWidth || !newHeight) && framebuffer->pixelBuffer) {
-        CORAL_free(framebuffer->pixelBuffer);
-        framebuffer->pixelBuffer = NULL;
-    }
-    else {
-        size_t oldPixelBufferAllocationSize = sizeof(Vec4b_u) * framebuffer->width * framebuffer->height;
-        size_t newPixelBufferAllocationSize = sizeof(Vec4b_u) * newWidth * newHeight;
-
-        if (oldPixelBufferAllocationSize >= newPixelBufferAllocationSize) {
-            // TODO: Shrink when applicable
-            goto end;
-        }
-
-        framebuffer->pixelBuffer = CORAL_realloc(framebuffer->pixelBuffer, newPixelBufferAllocationSize);
-        CORAL_ASSERT(framebuffer->pixelBuffer, "Failed to allocate framebuffer.");
-    }
-
-end:
-    framebuffer->width = newWidth;
-    framebuffer->height = newHeight;
-}
-
-
-bool Framebuffer_drawToWindow(Framebuffer_t* framebuffer, Window_t* window, bool waitForVerticalSync) {
+bool Framebuffer_drawToWindow(Framebuffer_t* framebuffer, const Window_t* window, bool waitForVerticalSync) {
     return true;
 }
 

@@ -217,6 +217,7 @@ set(CORAL_SOURCES
     src/graphics/mesh.c
     src/graphics/object.c
     src/graphics/scene.c
+    src/graphics/windowing.c
     src/graphics/windowingImplementations/windowing_null.c
     src/graphics/windowingImplementations/windowing_win32.cpp
     src/graphics/renderingImplementations/rendering_null.c
