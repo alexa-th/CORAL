@@ -144,6 +144,10 @@ CORAL_API bool Window_getMouseRestriction(Window_t* window);
  *  \param[in]  restrictMouse   If \c true, will hide the cursor and restrict the mouse such that the cursor can not
  *                              leave \p window. If \c false, will show the cursor and release the mouse such that it
  *                              can move freely again.
+ *
+ *  \note
+ *      This function is merely a request to restrict the mouse; to find out whether the mouse really is restricted,
+ *      check the value returned by \p Window_getMouseRestriction().
  */
 CORAL_API void Window_setMouseRestriction(Window_t* window, bool restrictMouse);
 

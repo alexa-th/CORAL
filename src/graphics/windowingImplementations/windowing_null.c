@@ -28,6 +28,8 @@ typedef struct {
 
 //- - FUNCTIONS
 
+//- - - WINDOW-SPECIFIC
+
 void Window_init(Window_t* window, size_t width, size_t height, Window_t* parentWindow) {
     WindowInfo_t* windowInfo = CORAL_malloc(sizeof(WindowInfo_t));
     CORAL_ASSERT(windowInfo, "Failed to allocate memory for window information.");
@@ -58,6 +60,11 @@ bool Window_getMouseRestriction(Window_t* window) {
 
 
 void Window_setMouseRestriction(Window_t* window, bool restrictMouse) { }
+
+
+
+//- - - GLOBAL
+
 void Window_processEvents(void) { }
 
 

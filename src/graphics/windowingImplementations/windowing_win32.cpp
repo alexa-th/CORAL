@@ -290,6 +290,7 @@ bool Window_getMouseRestriction(Window_t* window) {
 }
 
 
+// TODO: Check whether the mouse really is captured and whether window is in the foreground
 void Window_setMouseRestriction(Window_t* window, bool restrictMouse) {
     if (Window_getMouseRestriction(window) == restrictMouse) { return; }
 
