@@ -348,6 +348,11 @@ bool Window_allShouldClose(void) {
 }
 
 
+bool Window_isInputCapable(void) {
+    return true;
+}
+
+
 bool Window_getMouseKeyPressed(MouseInput_e key) {
     CORAL_ASSERT(key, "Invalid key.");
 

@@ -73,6 +73,11 @@ bool Window_allShouldClose(void) {
 }
 
 
+bool Window_isInputCapable(void) {
+    return false;
+}
+
+
 bool Window_getMouseKeyPressed(MouseInput_e key) {
     return false;
 }

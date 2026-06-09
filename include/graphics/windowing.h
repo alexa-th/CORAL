@@ -169,6 +169,19 @@ CORAL_API void Window_processEvents(void);
 CORAL_API bool Window_allShouldClose(void);
 
 
+/*! \returns
+ *      \c true if windows can receive input through the respective callback functions and input can
+ *      be queried through the \p Window_getMouseKeyPressed(), \p Window_getKeyboardKeyPressed(), and
+ *      \p Window_getModifierFlags() functions; otherwise, \c false.
+ *
+ *  \note
+ *      Should be checked before assuming the user will perform some input in order to close the program.
+ *      If the return value is \c false, it can be assumed that the program is running headless, which means
+ *      that no user input can occur.
+ */
+CORAL_API bool Window_isInputCapable(void);
+
+
 /*! \returns \c true if \p key is pressed, otherwise \c false.
  *  \note
  *      Does not necessarily represent the real-time state of \p key, as the returned
